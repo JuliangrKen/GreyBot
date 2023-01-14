@@ -17,5 +17,10 @@ namespace GreyBot.Data
         {
             Database.EnsureCreated();
         }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlite("Filename=GreyBot.db");
+        }
     }
 }
