@@ -15,6 +15,13 @@ var configPath = $"{Environment.CurrentDirectory}\\BotConfig.json";
 #endif
 
 services.AddSingleton(BotConfig.GetFromFile(configPath));
+
+var discordSocketCfg = new DiscordSocketConfig()
+{
+    LogGatewayIntentWarnings = false,
+};
+
+services.AddSingleton(discordSocketCfg);
 services.AddSingleton<DiscordSocketClient>();
 services.AddSingleton<InteractionService>();
 services.AddSingleton<DiscordBot>();
@@ -27,5 +34,3 @@ var bot = build.GetService<DiscordBot>()
     ?? throw new NullReferenceException();
 
 await bot.Run();
-
-Console.WriteLine("Bye-bye");
