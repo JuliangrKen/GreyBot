@@ -1,4 +1,6 @@
-﻿using GreyBot;
+﻿using Discord.Interactions;
+using Discord.WebSocket;
+using GreyBot;
 using GreyBot.Data;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,6 +15,9 @@ var configPath = $"{Environment.CurrentDirectory}\\BotConfig.json";
 #endif
 
 services.AddSingleton(BotConfig.GetFromFile(configPath));
+services.AddSingleton<DiscordSocketClient>();
+services.AddSingleton<InteractionService>();
+services.AddSingleton<DiscordBot>();
 
 var build = services.BuildServiceProvider();
 
