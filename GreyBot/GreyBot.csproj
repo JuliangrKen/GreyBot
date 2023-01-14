@@ -15,4 +15,13 @@
     <ProjectReference Include="..\GreyBot.Data\GreyBot.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="BotConfig.Development.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="BotConfig.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
