@@ -90,14 +90,14 @@ namespace GreyBot.Modules
             return insultsArray[RandomNumberGenerator.GetInt32(1, insultsArray.Length)];
         }
         
-        private async Task AddAbuseLog(ulong recipientId, ulong senderId, ulong guildId)
+        private async Task AddAbuseLog(ulong recipientDiscordId, ulong senderDiscordId, ulong guildId)
         {
             var repository = new Repository<InsultLog>(dbContext);
 
             await repository.Create(new InsultLog()
             {
-                RecipientId = recipientId,
-                SenderId = senderId,
+                RecipientDiscordId = recipientDiscordId,
+                SenderDiscordId = senderDiscordId,
                 GuildId = guildId,
             });
         }
