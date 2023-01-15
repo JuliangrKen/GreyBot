@@ -5,7 +5,7 @@ namespace GreyBot.Data
 {
     public class GreyBotContext : DbContext
     {
-        public DbSet<User> Users { get; set; }
+        public DbSet<GuildUser> Users { get; set; }
 
         public DbSet<Compliment> Compliments { get; set; }
         public DbSet<Insult> Insults { get; set; }
