@@ -60,7 +60,7 @@ namespace GreyBot.Modules
                     Text = text,
                 });
 
-                await RespondAsync($"Оскорбление было добавлено в базу данных!\n`{text}`");
+                await RespondAsync($"Оскорбление было добавлено в базу данных!\n`{text}`", ephemeral: true);
             }
             catch
             {
