@@ -20,6 +20,8 @@ services.AddSingleton(BotConfig.GetFromFile(configPath));
 var discordSocketCfg = new DiscordSocketConfig()
 {
     LogGatewayIntentWarnings = false,
+    GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers,
+    AlwaysDownloadUsers = true,
 };
 
 services.AddSingleton(discordSocketCfg);
