@@ -1,4 +1,5 @@
-﻿using Discord.Interactions;
+﻿using Discord;
+using Discord.Interactions;
 using Discord.WebSocket;
 using GreyBot;
 using GreyBot.Data;
@@ -23,7 +24,7 @@ var discordSocketCfg = new DiscordSocketConfig()
 
 services.AddSingleton(discordSocketCfg);
 services.AddSingleton<DiscordSocketClient>();
-services.AddSingleton<InteractionService>();
+services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()));
 services.AddSingleton<DiscordBot>();
 
 var build = services.BuildServiceProvider();
