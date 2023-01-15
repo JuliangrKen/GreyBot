@@ -7,11 +7,14 @@ namespace GreyBot.Data.Models
         public int Id { get; set; }
 
         [Required]
-        public int SenderId { get; set; }
-        public User? Sender { get; set; }
+        public ulong GuildId { get; set; }
+
+        [Required]
+        public ulong SenderId { get; set; }
+        public GuildUser? Sender { get; set; }
         
         [Required]
-        public int RecipientId { get; set; }
-        public User? Recipient { get; set; }
+        public ulong RecipientId { get; set; }
+        public GuildUser? Recipient { get; set; }
     }
 }
