@@ -84,9 +84,12 @@ namespace GreyBot.Modules
         }
 
         private Insult GetRandomInsult(IEnumerable<Insult> insults)
-            => insults.FirstOrDefault(x => x.Id == RandomNumberGenerator.GetInt32(1, insults.Count()))
-                ?? throw new NullReferenceException();
+        {
+            var insultsArray = insults.ToArray();
 
+            return insultsArray[RandomNumberGenerator.GetInt32(1, insultsArray.Length)];
+        }
+        
         private async Task AddAbuseLog(ulong recipientId, ulong senderId, ulong guildId)
         {
             var repository = new Repository<InsultLog>(dbContext);
