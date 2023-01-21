@@ -1,7 +1,6 @@
 ﻿using GreyBot.Data;
 using GreyBot.Data.Models;
 using GreyBot.Data.Repos;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 
 namespace GreyBot.Modules.Bases
