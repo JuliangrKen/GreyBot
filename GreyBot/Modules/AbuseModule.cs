@@ -71,7 +71,7 @@ namespace GreyBot.Modules
         [SlashCommand("get-all", "Получить список всех доступных оскорблений")]
         public async Task GetAllInsults()
         {
-            var insults = repository.GetAll();
+            var insults = repository.GetAll().Where((i) => i.GuildId == Context.Guild.Id);
 
             var embedBuilder = new EmbedBuilder()
                 .WithColor(new Random().NextColor())
@@ -92,7 +92,7 @@ namespace GreyBot.Modules
 
             try
             {
-                await repository.Delete(repository.GetAll().FirstOrDefault((i) => i.Id == id) ??
+                await repository.Delete(repository.GetAll().FirstOrDefault((i) => i.Id == id && i.GuildId == Context.Guild.Id) ??
                     throw new NullReferenceException());
 
                 await RespondAsync("Удаление произошло успешно!", ephemeral: true);
