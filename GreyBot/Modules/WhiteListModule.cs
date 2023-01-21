@@ -30,7 +30,7 @@ namespace GreyBot.Modules
         }
 
         [RequireOwner]
-        [SlashCommand("delete", "Убрать пользователя в вайт-листа")]
+        [SlashCommand("delete", "Убрать пользователя из вайт-листа")]
         public async Task DeleteGuildUserWhiteList([Summary("пользователь")] IUser user)
         {
             try
