@@ -2,18 +2,15 @@
 using Discord.Interactions;
 using GreyBot.Data;
 using GreyBot.Data.Models;
-using GreyBot.Data.Repos;
+using GreyBot.Modules.Bases;
 
 namespace GreyBot.Modules
 {
     [Group("whitelist", "Команды для работы с вайт-листом")]
-    public class WhiteListModule : InteractionModuleBase<SocketInteractionContext>
+    public class WhiteListModule : CrudModule<GuildUser>
     {
-        private readonly GreyBotContext dbContext;
-
-        public WhiteListModule(GreyBotContext dbContext)
+        public WhiteListModule(GreyBotContext dbContext) : base(dbContext)
         {
-            this.dbContext = dbContext;
         }
 
         [RequireOwner]
@@ -22,13 +19,13 @@ namespace GreyBot.Modules
         {
             try
             {
-                await CreateOfUpdateGuildUser(user.Id, Context.Guild.Id, true);
+                await CreateOrUpdateGuildUser(user.Id, Context.Guild.Id, true);
 
                 await RespondAsync("Пользователь был успешно добавлен в whitelist!", ephemeral: true);
             }
             catch
             {
-                await RespondAsync("Что-то пошло не так!", ephemeral: true);
+                await WriteErrorMessage();
             }
         }
 
@@ -38,7 +35,7 @@ namespace GreyBot.Modules
         {
             try
             {
-                await CreateOfUpdateGuildUser(user.Id, Context.Guild.Id, false);
+                await CreateOrUpdateGuildUser(user.Id, Context.Guild.Id, false);
 
                 await RespondAsync("Пользователь больше не в whitelist!", ephemeral: true);
             }
@@ -48,11 +45,8 @@ namespace GreyBot.Modules
             }
         }
 
-
-        private async Task CreateOfUpdateGuildUser(ulong discordId, ulong guildId, bool hasWhiteList)
+        private async Task CreateOrUpdateGuildUser(ulong discordId, ulong guildId, bool hasWhiteList)
         {
-            var repository = new Repository<GuildUser>(dbContext);
-
             var guildUser = repository.GetAll().FirstOrDefault(u => u.DiscordId == discordId && u.GuildId == guildId);
 
             if (guildUser == null)

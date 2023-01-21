@@ -4,6 +4,7 @@ using GreyBot.Data;
 using GreyBot.Data.Models;
 using GreyBot.Data.Repos;
 using GreyBot.Extensions;
+using GreyBot.Modules.Bases;
 using GreyBot.Utils;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,15 +12,13 @@ using System.Text;
 namespace GreyBot.Modules
 {
     [Group("abuse", "Команды связанные с оскорблениями")]
-    public class AbuseModule : InteractionModuleBase<SocketInteractionContext>
+    public class AbuseModule : CrudModule<Insult>
     {
-        private readonly GreyBotContext dbContext;
-
         private const int insultViewMaxLength = 100;
         private const int insultsViewNumber = 10;
-        public AbuseModule(GreyBotContext dbContext)
+
+        protected AbuseModule(GreyBotContext dbContext) : base(dbContext)
         {
-            this.dbContext = dbContext;
         }
 
         [SlashCommand("user", "Оскорбить пользователя")]
@@ -33,16 +32,14 @@ namespace GreyBot.Modules
 
             try
             {
-                var repository = new Repository<Insult>(dbContext);
-
-                var randomInsult = GetRandomInsult(repository.GetAll().Where(i => i.GuildId == Context.Guild.Id));
+                var randomInsult = GetRandomModel(repository.GetAll().Where(i => i.GuildId == Context.Guild.Id));
 
                 await AddAbuseLog(user.Id, Context.User.Id, Context.Guild.Id);
                 await RespondAsync($"{user.Mention}, {randomInsult.Text}");
             }
             catch
             {
-                await RespondAsync("Что-то пошло не так!", ephemeral: true);
+                await WriteErrorMessage();
             }
         }
 
@@ -57,8 +54,6 @@ namespace GreyBot.Modules
                     return;
                 }
 
-                var repository = new Repository<Insult>(dbContext);
-
                 await repository.Create(new Insult()
                 {
                     GuildId = Context.Guild.Id,
@@ -69,14 +64,13 @@ namespace GreyBot.Modules
             }
             catch
             {
-                await RespondAsync("Что-то пошло не так!", ephemeral: true);
+                await WriteErrorMessage();
             }
         }
 
         [SlashCommand("get-all", "Получить список всех доступных оскорблений")]
         public async Task GetAllInsults()
         {
-            var repository = new Repository<Insult>(dbContext);
             var insults = repository.GetAll();
 
             var embedBuilder = new EmbedBuilder()
@@ -97,33 +91,11 @@ namespace GreyBot.Modules
             return dataStringViewer.GetView(stringBuilder, startIndex, startIndex + insultsViewNumber, (insult) =>
             {
                 var text = insult.Text?.Length > insultViewMaxLength ? insult.Text?[0..insultViewMaxLength] : insult.Text;
-                return $"{insult.Id} \t{text}\n";
+                return $"{insult.Id}\t  {text}\n";
             }, () =>
             {
                 stringBuilder.Append("```");
             });
-        }
-
-        private async Task<bool> UserHasWhiteList(ulong discordId, ulong guildId)
-        {
-            var repository = new Repository<GuildUser>(dbContext);
-
-            var user = repository.GetAll().FirstOrDefault(i => i.DiscordId == discordId && i.GuildId == guildId);
-
-            if (user is null)
-            {
-                await repository.Create(new GuildUser() { DiscordId = discordId, GuildId = guildId });
-                return false;
-            }
-
-            return user.HasWhiteList;
-        }
-
-        private Insult GetRandomInsult(IEnumerable<Insult> insults)
-        {
-            var insultsArray = insults.ToArray();
-
-            return insultsArray[RandomNumberGenerator.GetInt32(1, insultsArray.Length)];
         }
 
         private async Task AddAbuseLog(ulong recipientDiscordId, ulong senderDiscordId, ulong guildId)
