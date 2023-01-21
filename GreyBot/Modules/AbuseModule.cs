@@ -6,7 +6,6 @@ using GreyBot.Data.Repos;
 using GreyBot.Extensions;
 using GreyBot.Modules.Bases;
 using GreyBot.Utils;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace GreyBot.Modules
