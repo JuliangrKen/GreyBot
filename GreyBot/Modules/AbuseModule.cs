@@ -3,7 +3,10 @@ using Discord.Interactions;
 using GreyBot.Data;
 using GreyBot.Data.Models;
 using GreyBot.Data.Repos;
+using GreyBot.Extensions;
+using GreyBot.Utils;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace GreyBot.Modules
 {
@@ -12,6 +15,8 @@ namespace GreyBot.Modules
     {
         private readonly GreyBotContext dbContext;
 
+        private const int insultViewMaxLength = 100;
+        private const int insultsViewNumber = 10;
         public AbuseModule(GreyBotContext dbContext)
         {
             this.dbContext = dbContext;
@@ -46,7 +51,7 @@ namespace GreyBot.Modules
         {
             try
             {
-                if (!UserHasWhiteList(Context.User.Id, Context.Guild.Id))
+                if (!await UserHasWhiteList(Context.User.Id, Context.Guild.Id))
                 {
                     await RespondAsync("У вас нет прав на добавление оскорблений!", ephemeral: true);
                     return;
@@ -68,7 +73,39 @@ namespace GreyBot.Modules
             }
         }
 
-        private bool UserHasWhiteList(ulong discordId, ulong guildId)
+        [SlashCommand("get-all", "Получить список всех доступных оскорблений")]
+        public async Task GetAllInsults()
+        {
+            var repository = new Repository<Insult>(dbContext);
+            var insults = repository.GetAll();
+
+
+            var embedBuilder = new EmbedBuilder()
+                .WithColor(new Random().NextColor())
+                .WithTitle("Список существующих оскорблений")
+                .WithDescription(BuildInsultsString(insults, 0));
+
+            await RespondAsync(embed: embedBuilder.Build());
+        }
+
+        private string BuildInsultsString(IEnumerable<Insult> insults, int startIndex)
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.Append("```ID:\tText:\n");
+
+            var dataStringViewer = new DataStringViewer<Insult>(insults);
+
+            return dataStringViewer.GetView(stringBuilder, startIndex, startIndex + insultsViewNumber, (insult) =>
+            {
+                var text = insult.Text?.Length > insultViewMaxLength ? insult.Text?[0..insultViewMaxLength] : insult.Text;
+                return $"{insult.Id} \t{text}\n";
+            }, () =>
+            {
+                stringBuilder.Append("```");
+            });
+        }
+
+        private async Task<bool> UserHasWhiteList(ulong discordId, ulong guildId)
         {
             var repository = new Repository<GuildUser>(dbContext);
 
@@ -76,7 +113,7 @@ namespace GreyBot.Modules
 
             if (user is null)
             {
-                repository.Create(new GuildUser() { DiscordId = discordId, GuildId = guildId });
+                await repository.Create(new GuildUser() { DiscordId = discordId, GuildId = guildId });
                 return false;
             }
 
@@ -89,7 +126,7 @@ namespace GreyBot.Modules
 
             return insultsArray[RandomNumberGenerator.GetInt32(1, insultsArray.Length)];
         }
-        
+
         private async Task AddAbuseLog(ulong recipientDiscordId, ulong senderDiscordId, ulong guildId)
         {
             var repository = new Repository<InsultLog>(dbContext);
