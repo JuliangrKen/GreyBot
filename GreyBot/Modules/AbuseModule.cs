@@ -79,7 +79,6 @@ namespace GreyBot.Modules
             var repository = new Repository<Insult>(dbContext);
             var insults = repository.GetAll();
 
-
             var embedBuilder = new EmbedBuilder()
                 .WithColor(new Random().NextColor())
                 .WithTitle("Список существующих оскорблений")
