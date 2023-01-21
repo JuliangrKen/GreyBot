@@ -81,6 +81,28 @@ namespace GreyBot.Modules
             await RespondAsync(embed: embedBuilder.Build());
         }
 
+        [SlashCommand("delete", "Удалить оскорбление по ID")]
+        public async Task DeleteInsult([Summary("id", "id оскорбления")] int id)
+        {
+            if (!await UserHasWhiteList(Context.User.Id, Context.Guild.Id))
+            {
+                await RespondAsync("У вас нет прав на удаление оскорблений!", ephemeral: true);
+                return;
+            }
+
+            try
+            {
+                await repository.Delete(repository.GetAll().FirstOrDefault((i) => i.Id == id) ??
+                    throw new NullReferenceException());
+
+                await RespondAsync("Удаление произошло успешно!", ephemeral: true);
+            }
+            catch
+            {
+                await WriteErrorMessage();
+            }
+        }
+
         private string BuildInsultsString(IEnumerable<Insult> insults, int startIndex)
         {
             var stringBuilder = new StringBuilder();
