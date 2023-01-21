@@ -13,6 +13,10 @@ namespace GreyBot.Modules
     [Group("abuse", "Команды связанные с оскорблениями")]
     public class AbuseModule : CrudModule<Insult>
     {
+        private const string AbuseCloseButtonId = "abuse_close_button";
+        private const string AbuseNextButtonId = "abuse_next_button";
+        private const string AbusePreviousButtonId = "abuse_previous_button";
+
         private const int insultViewMaxLength = 100;
         private const int insultsViewNumber = 10;
 
@@ -77,7 +81,11 @@ namespace GreyBot.Modules
                 .WithTitle("Список существующих оскорблений")
                 .WithDescription(BuildInsultsString(insults, 0));
 
-            await RespondAsync(embed: embedBuilder.Build());
+            var componentBuilder = new ComponentBuilder()
+                .WithButton(emote: new Emoji("❌"), customId: AbuseCloseButtonId, style: ButtonStyle.Secondary)
+                .WithButton("Следующие 11-20", AbuseNextButtonId);
+
+            await RespondAsync(embed: embedBuilder.Build(), components: componentBuilder.Build());
         }
 
         [SlashCommand("delete", "Удалить оскорбление по ID")]
