@@ -14,7 +14,6 @@ namespace GreyBot.Modules
     [Group("abuse", "Команды связанные с оскорблениями")]
     public class AbuseModule : CrudModule<Insult>
     {
-        private const string AbuseCloseButtonId = "abuse_close_button";
         private const string AbusePreviousButtonId = "abuse_previous_button";
         private const string AbuseNextButtonId = "abuse_next_button";
 
@@ -118,9 +117,6 @@ namespace GreyBot.Modules
         {
             switch (component.Data.CustomId)
             {
-                case AbuseCloseButtonId:
-                    await DeleteComponentMassage(component);
-                    return;
                 case AbuseNextButtonId:
                     await WriteNextDataInsult(ParsePageNumFromEmbed(component.Message.Embeds.First()) + 1, component);
                     return;
@@ -152,7 +148,6 @@ namespace GreyBot.Modules
         private ComponentBuilder GetComponentBuilder(int startIndex, int countInsults)
         {
             var componentBuilder = new ComponentBuilder()
-                .WithButton(emote: new Emoji("❌"), customId: AbuseCloseButtonId, style: ButtonStyle.Secondary)
                 .WithButton($"Предыдущие {insultsViewNumber}", AbusePreviousButtonId, disabled: startIndex < insultsViewNumber - 1)
                 .WithButton($"Следующие {insultsViewNumber}", AbuseNextButtonId, disabled: startIndex + insultsViewNumber >= countInsults);
 
