@@ -15,8 +15,8 @@ namespace GreyBot.Modules
     public class AbuseModule : CrudModule<Insult>
     {
         private const string AbuseCloseButtonId = "abuse_close_button";
-        private const string AbuseNextButtonId = "abuse_next_button";
         private const string AbusePreviousButtonId = "abuse_previous_button";
+        private const string AbuseNextButtonId = "abuse_next_button";
 
         private const int insultViewMaxLength = 100;
         private const int insultsViewNumber = 10;
@@ -86,13 +86,10 @@ namespace GreyBot.Modules
             var embedBuilder = new EmbedBuilder()
                 .WithColor(new Random().NextColor())
                 .WithTitle("Список существующих оскорблений")
-                .WithDescription(BuildInsultsString(insults, 0));
+                .WithDescription(BuildInsultsString(insults, 0))
+                .WithFooter("стр. 1");
 
-            var componentBuilder = new ComponentBuilder()
-                .WithButton(emote: new Emoji("❌"), customId: AbuseCloseButtonId, style: ButtonStyle.Secondary)
-                .WithButton("Следующие 11-20", AbuseNextButtonId);
-
-            await RespondAsync(embed: embedBuilder.Build(), components: componentBuilder.Build());
+            await RespondAsync(embed: embedBuilder.Build(), components: GetComponentBuilder(0, insults.Count()).Build());
         }
 
         [SlashCommand("delete", "Удалить оскорбление по ID")]
@@ -125,16 +122,51 @@ namespace GreyBot.Modules
                     await DeleteComponentMassage(component);
                     return;
                 case AbuseNextButtonId:
-
+                    await WriteNextDataInsult(ParsePageNumFromEmbed(component.Message.Embeds.First()) + 1, component);
                     return;
                 case AbusePreviousButtonId:
-
+                    await WriteNextDataInsult(ParsePageNumFromEmbed(component.Message.Embeds.First()) - 1, component);
                     return;
             };
         }
 
         private Task DeleteComponentMassage(SocketMessageComponent component)
         => component.Channel.DeleteMessageAsync(component.Message);
+
+        private async Task WriteNextDataInsult(int newPageNumber, SocketMessageComponent component)
+        {
+            var insults = repository.GetAll().Where((i) => i.GuildId == component.GuildId);
+            var startIndex = (newPageNumber - 1) * insultsViewNumber;
+            
+            await component.UpdateAsync((messageProperties) =>
+            {
+                var embedBuilder = component.Message.Embeds.First().ToEmbedBuilder()
+                    .WithDescription(BuildInsultsString(insults, startIndex))
+                    .WithFooter($"стр. {newPageNumber}");
+
+                messageProperties.Embed = embedBuilder.Build();
+                messageProperties.Components = GetComponentBuilder(startIndex, insults.Count()).Build();
+            });
+        }
+
+        private ComponentBuilder GetComponentBuilder(int startIndex, int countInsults)
+        {
+            var componentBuilder = new ComponentBuilder()
+                .WithButton(emote: new Emoji("❌"), customId: AbuseCloseButtonId, style: ButtonStyle.Secondary)
+                .WithButton($"Предыдущие {insultsViewNumber}", AbusePreviousButtonId, disabled: startIndex < insultsViewNumber - 1)
+                .WithButton($"Следующие {insultsViewNumber}", AbuseNextButtonId, disabled: startIndex + insultsViewNumber >= countInsults);
+
+            return componentBuilder;
+        }
+
+        private int ParsePageNumFromEmbed(Embed embed)
+        {
+            var text = embed.Footer?.Text ?? string.Empty;
+
+            if (string.IsNullOrEmpty(text)) return 1; // its first page
+
+            return Convert.ToInt32(text[5..]); // "стр. "num
+        }
 
         private string BuildInsultsString(IEnumerable<Insult> insults, int startIndex)
         {
