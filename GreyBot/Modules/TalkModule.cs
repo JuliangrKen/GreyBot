@@ -20,7 +20,7 @@ namespace GreyBot.Modules
             if (Singleton != null) return;
             Singleton = this;
 
-            socketClient.ModalSubmitted += BotWriteEmbedHandle;
+            socketClient.ModalSubmitted += HandleBotWriteEmbed;
         }
 
         [SlashCommand("embed", "Написать embed")]
@@ -35,7 +35,7 @@ namespace GreyBot.Modules
             await Context.Interaction.RespondWithModalAsync(modalBuilder.Build());
         }
 
-        private async Task BotWriteEmbedHandle(SocketModal modal)
+        private async Task HandleBotWriteEmbed(SocketModal modal)
         {
             var components = modal.Data.Components;
 
