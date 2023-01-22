@@ -89,7 +89,7 @@ namespace GreyBot.Modules
                 .WithDescription(BuildInsultsString(insults, 0))
                 .WithFooter("стр. 1");
 
-            await RespondAsync(embed: embedBuilder.Build(), components: GetComponentBuilder(0, insults.Count()).Build());
+            await RespondAsync(embed: embedBuilder.Build(), components: GetComponentBuilder(0, insults.Count()).Build(), ephemeral: true);
         }
 
         [SlashCommand("delete", "Удалить оскорбление по ID")]
