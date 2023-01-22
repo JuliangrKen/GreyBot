@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
+using Discord.WebSocket;
 using GreyBot.Data;
 using GreyBot.Data.Models;
 using GreyBot.Data.Repos;
@@ -20,8 +21,14 @@ namespace GreyBot.Modules
         private const int insultViewMaxLength = 100;
         private const int insultsViewNumber = 10;
 
-        protected AbuseModule(GreyBotContext dbContext) : base(dbContext)
+        private static AbuseModule? Singleton;
+
+        protected AbuseModule(DiscordSocketClient socketClient, GreyBotContext dbContext) : base(dbContext)
         {
+            if (Singleton != null) return;
+            Singleton = this;
+
+            socketClient.ButtonExecuted += HandleGetAllInsults;
         }
 
         [SlashCommand("user", "Оскорбить пользователя")]
@@ -109,6 +116,25 @@ namespace GreyBot.Modules
                 await WriteErrorMessage();
             }
         }
+
+        private async Task HandleGetAllInsults(SocketMessageComponent component)
+        {
+            switch (component.Data.CustomId)
+            {
+                case AbuseCloseButtonId:
+                    await DeleteComponentMassage(component);
+                    return;
+                case AbuseNextButtonId:
+
+                    return;
+                case AbusePreviousButtonId:
+
+                    return;
+            };
+        }
+
+        private Task DeleteComponentMassage(SocketMessageComponent component)
+        => component.Channel.DeleteMessageAsync(component.Message);
 
         private string BuildInsultsString(IEnumerable<Insult> insults, int startIndex)
         {
