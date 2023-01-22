@@ -20,7 +20,11 @@ namespace GreyBot.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+#if DEBUG
+            optionsBuilder.UseSqlite("Filename=GreyBotDev.db");
+#else
             optionsBuilder.UseSqlite("Filename=GreyBot.db");
+#endif
         }
     }
 }
