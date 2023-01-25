@@ -88,7 +88,10 @@ namespace GreyBot.Modules
                 .WithDescription(BuildInsultsString(insults, 0))
                 .WithFooter("стр. 1");
 
-            await RespondAsync(embed: embedBuilder.Build(), components: GetComponentBuilder(0, insults.Count()).Build(), ephemeral: true);
+            await RespondAsync(embed: embedBuilder.Build(),
+                components: GetBottonsForNavigation(0, insults.Count(), insultsViewNumber,
+                                                                    AbusePreviousButtonId, AbuseNextButtonId).Build(), 
+                ephemeral: true);
         }
 
         [SlashCommand("delete", "Удалить оскорбление по ID")]
@@ -118,10 +121,10 @@ namespace GreyBot.Modules
             switch (component.Data.CustomId)
             {
                 case AbuseNextButtonId:
-                    await WriteNextDataInsult(ParsePageNumFromEmbed(component.Message.Embeds.First()) + 1, component);
+                    await WriteNextDataInsult(GetPageNumFromFooter(component.Message.Embeds.First()) + 1, component);
                     return;
                 case AbusePreviousButtonId:
-                    await WriteNextDataInsult(ParsePageNumFromEmbed(component.Message.Embeds.First()) - 1, component);
+                    await WriteNextDataInsult(GetPageNumFromFooter(component.Message.Embeds.First()) - 1, component);
                     return;
             };
         }
@@ -134,33 +137,19 @@ namespace GreyBot.Modules
             await component.UpdateAsync((messageProperties) =>
             {
                 var embedBuilder = component.Message.Embeds.First().ToEmbedBuilder()
-                    .WithDescription(BuildInsultsString(insults, startIndex))
-                    .WithFooter($"стр. {newPageNumber}");
+                    .WithDescription(BuildInsultsString(insults, startIndex));
+
+                InstallPageInFooter(embedBuilder, newPageNumber);
 
                 messageProperties.Embed = embedBuilder.Build();
-                messageProperties.Components = GetComponentBuilder(startIndex, insults.Count()).Build();
+                messageProperties.Components = GetBottonsForNavigation(startIndex, insults.Count(),
+                                                                                       insultsViewNumber,
+                                                                                       AbusePreviousButtonId,
+                                                                                       AbuseNextButtonId).Build();
             });
         }
 
-        private ComponentBuilder GetComponentBuilder(int startIndex, int countInsults)
-        {
-            var componentBuilder = new ComponentBuilder()
-                .WithButton($"Предыдущие {insultsViewNumber}", AbusePreviousButtonId, disabled: startIndex < insultsViewNumber - 1)
-                .WithButton($"Следующие {insultsViewNumber}", AbuseNextButtonId, disabled: startIndex + insultsViewNumber >= countInsults);
-
-            return componentBuilder;
-        }
-
-        private int ParsePageNumFromEmbed(Embed embed)
-        {
-            var text = embed.Footer?.Text ?? string.Empty;
-
-            if (string.IsNullOrEmpty(text)) return 1; // its first page
-
-            return Convert.ToInt32(text[5..]); // "стр. "num
-        }
-
-        private string BuildInsultsString(IEnumerable<Insult> insults, int startIndex)
+        private static string BuildInsultsString(IEnumerable<Insult> insults, int startIndex)
         {
             var stringBuilder = new StringBuilder();
             stringBuilder.Append("```ID:\tText:\n");
