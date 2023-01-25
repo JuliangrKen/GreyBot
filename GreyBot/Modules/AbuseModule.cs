@@ -126,9 +126,6 @@ namespace GreyBot.Modules
             };
         }
 
-        private Task DeleteComponentMassage(SocketMessageComponent component)
-        => component.Channel.DeleteMessageAsync(component.Message);
-
         private async Task WriteNextDataInsult(int newPageNumber, SocketMessageComponent component)
         {
             var insults = repository.GetAll().Where((i) => i.GuildId == component.GuildId);
