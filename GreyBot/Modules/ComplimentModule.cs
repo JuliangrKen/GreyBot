@@ -71,7 +71,7 @@ namespace GreyBot.Modules
             }
         }
 
-        [SlashCommand("get-all", "Получить список всех доступных оскорблений")]
+        [SlashCommand("get-all", "Получить список всех доступных комплиментов")]
         public async Task GetAllCompliments()
         {
             var compliments = repository.GetAll().Where((i) => i.GuildId == Context.Guild.Id);
