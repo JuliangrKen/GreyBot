@@ -89,8 +89,11 @@ namespace GreyBot.Modules
                 .WithFooter("стр. 1");
 
             await RespondAsync(embed: embedBuilder.Build(),
-                components: GetBottonsForNavigation(0, insults.Count(), insultsViewNumber,
-                                                                    AbusePreviousButtonId, AbuseNextButtonId).Build(), 
+                components: GetBottonsForNavigation(0,
+                                                    insults.Count(),
+                                                    insultsViewNumber,
+                                                    AbusePreviousButtonId,
+                                                    AbuseNextButtonId).Build(),
                 ephemeral: true);
         }
 
@@ -142,10 +145,11 @@ namespace GreyBot.Modules
                 InstallPageInFooter(embedBuilder, newPageNumber);
 
                 messageProperties.Embed = embedBuilder.Build();
-                messageProperties.Components = GetBottonsForNavigation(startIndex, insults.Count(),
-                                                                                       insultsViewNumber,
-                                                                                       AbusePreviousButtonId,
-                                                                                       AbuseNextButtonId).Build();
+                messageProperties.Components = GetBottonsForNavigation(startIndex,
+                                                                       insults.Count(),
+                                                                       insultsViewNumber,
+                                                                       AbusePreviousButtonId,
+                                                                       AbuseNextButtonId).Build();
             });
         }
 
